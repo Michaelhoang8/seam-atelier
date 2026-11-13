@@ -9,9 +9,9 @@
   </head>
   <body>
     <header>
-      <a href="#">SEAM <span>ATELIER</span></a>
+      <a href="#">Seam Atelier</a>
       <div>
-        <button id="sample">Load study</button
+        <button id="sample">Sample image</button
         ><label class="file"
           >Open image<input
             id="image-file"
@@ -28,43 +28,21 @@
       </div>
     </header>
     <main>
-      <section class="intro">
-        <div>
-          <p class="eyebrow">CONTENT-AWARE RESIZING</p>
-          <h1>Make room<br />for what matters.</h1>
-        </div>
-        <p>Remove a path, not a slice.<br />Protect a region. Inspect what disappears.</p>
-      </section>
-      <div class="toolbar">
-        <label
-          >Reduce<select id="axis">
-            <option value="width">Width</option>
-            <option value="height">Height</option>
-          </select></label
-        ><label>Pixels to remove<input id="count" type="number" min="1" value="40" /></label
-        ><button id="carve" class="primary">Carve seams ↗</button
-        ><button id="cancel" disabled>Cancel</button><span id="dimensions"></span>
-      </div>
-      <p id="status" role="status" aria-live="polite"></p>
-      <section class="stage">
-        <div class="frame">
-          <div class="frame-head">
-            <h2>01 / Original</h2>
-            <label class="compact"
-              >View<select id="view">
-                <option value="image">Image</option>
-                <option value="energy">Gradient energy</option>
+      <div class="editor-layout">
+        <aside class="tools">
+          <h2>Resize</h2>
+          <div class="toolbar">
+            <label
+              >Reduce<select id="axis">
+                <option value="width">Width</option>
+                <option value="height">Height</option>
               </select></label
-            >
+            ><label>Pixels to remove<input id="count" type="number" min="1" value="40" /></label
+            ><button id="carve" class="primary">Resize image</button
+            ><button id="cancel" disabled>Cancel</button><span id="dimensions"></span>
           </div>
-          <div class="mat">
-            <canvas
-              id="source-canvas"
-              tabindex="0"
-              aria-label="Source image. Choose Protect or Erase, then paint; arrow keys move the cursor and Space paints."
-              role="img"
-            ></canvas>
-          </div>
+          <p id="status" role="status" aria-live="polite"></p>
+          <h2>Protection mask</h2>
           <div class="paint-tools">
             <label
               >Brush<select id="brush">
@@ -82,69 +60,96 @@
                 aria-label="Brush radius" /></label
             ><button id="undo">Undo mask</button><button id="clear">Clear mask</button>
           </div>
-          <p class="note" id="mask-note"></p>
+          <button id="method-open" class="method-button">Method & controls</button>
+        </aside>
+        <div class="image-workspace">
+          <section class="stage">
+            <div class="frame">
+              <div class="frame-head">
+                <h2>Source</h2>
+                <label class="compact"
+                  >View<select id="view">
+                    <option value="image">Image</option>
+                    <option value="energy">Gradient energy</option>
+                  </select></label
+                >
+              </div>
+              <div class="mat">
+                <canvas
+                  id="source-canvas"
+                  tabindex="0"
+                  aria-label="Source image. Choose Protect or Erase, then paint; arrow keys move the cursor and Space paints."
+                  role="img"
+                ></canvas>
+              </div>
+              <p class="note" id="mask-note"></p>
+            </div>
+            <div class="frame">
+              <div class="frame-head">
+                <h2>Result</h2>
+                <label class="compact"
+                  >Compare<select id="result-view">
+                    <option value="carved">Seam carved</option>
+                    <option value="scaled">Uniformly scaled</option>
+                  </select></label
+                >
+              </div>
+              <div class="mat">
+                <canvas id="result-canvas" role="img" aria-label="Resized image preview"></canvas>
+                <p id="empty-result">No resized image.</p>
+              </div>
+              <div class="result-footer">
+                <span id="result-size"></span><button id="png" disabled>Download carved PNG</button>
+              </div>
+              <p class="note">
+                Both panes use the original image extent. The smaller image sits centered,
+                preserving a shared pixel scale.
+              </p>
+            </div>
+          </section>
+          <section id="evidence" hidden>
+            <div class="evidence-head">
+              <h2>Removed seams</h2>
+              <div>
+                <button id="save">Save session</button><button id="report">Export evidence</button>
+              </div>
+            </div>
+            <div class="seam-controls">
+              <label for="seam">Removal <output id="seam-label"></output></label
+              ><input id="seam" type="range" min="0" value="0" aria-label="Selected seam" /><span
+                id="seam-info"
+              ></span>
+            </div>
+            <p class="note">
+              Orange marks the selected path on the original image. Later paths use surviving
+              original coordinates, so their displayed spacing can widen after earlier removals.
+            </p>
+            <p id="protection-summary"></p>
+            <details>
+              <summary>Removal ledger</summary>
+              <div class="scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Seam</th>
+                      <th>Working width</th>
+                      <th>Gradient cost</th>
+                      <th>Protected pixels</th>
+                      <th>Total cost</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ledger"></tbody>
+                </table>
+              </div>
+            </details>
+          </section>
         </div>
-        <div class="frame">
-          <div class="frame-head">
-            <h2>02 / Result</h2>
-            <label class="compact"
-              >Compare<select id="result-view">
-                <option value="carved">Seam carved</option>
-                <option value="scaled">Uniformly scaled</option>
-              </select></label
-            >
-          </div>
-          <div class="mat">
-            <canvas id="result-canvas" role="img" aria-label="Resized image preview"></canvas>
-            <p id="empty-result">Carve a smaller composition.</p>
-          </div>
-          <div class="result-footer">
-            <span id="result-size"></span><button id="png" disabled>Download carved PNG</button>
-          </div>
-          <p class="note">
-            Both panes use the original image extent. The smaller image sits centered, preserving a
-            shared pixel scale.
-          </p>
-        </div>
-      </section>
-      <section id="evidence" hidden>
-        <div class="evidence-head">
-          <h2>Follow a seam.</h2>
-          <div>
-            <button id="save">Save session</button><button id="report">Export evidence</button>
-          </div>
-        </div>
-        <div class="seam-controls">
-          <label for="seam">Removal <output id="seam-label"></output></label
-          ><input id="seam" type="range" min="0" value="0" aria-label="Selected seam" /><span
-            id="seam-info"
-          ></span>
-        </div>
-        <p class="note">
-          Orange marks the selected path on the original image. Later paths use surviving original
-          coordinates, so their displayed spacing can widen after earlier removals.
-        </p>
-        <p id="protection-summary"></p>
-        <details>
-          <summary>Removal ledger</summary>
-          <div class="scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Seam</th>
-                  <th>Working width</th>
-                  <th>Gradient cost</th>
-                  <th>Protected pixels</th>
-                  <th>Total cost</th>
-                </tr>
-              </thead>
-              <tbody id="ledger"></tbody>
-            </table>
-          </div>
-        </details>
-      </section>
-      <details class="method">
-        <summary>How this cut is chosen</summary>
+      </div>
+    </main>
+    <dialog id="method-panel" aria-label="Seam carving method">
+      <button id="method-close" aria-label="Close method">×</button>
+      <details class="method" open>
+        <summary>Seam carving</summary>
         <p>
           RGB central-difference gradient magnitude estimates visual energy, with clamped edge
           neighbors. A dynamic program finds a minimum-cost connected path from top to bottom. Each
@@ -169,9 +174,6 @@
           and settings; they are limited to 2 MB. Images stay in the browser.
         </p>
       </details>
-    </main>
-    <footer>
-      <span>PIXELS, WITH INTENTION.</span><span>LOCAL IMAGE LAB / DYNAMIC PROGRAMMING</span>
-    </footer>
+    </dialog>
   </body>
 </html>

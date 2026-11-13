@@ -25,6 +25,7 @@ function protectedCount() {
 function controls() {
   for (const n of document.querySelectorAll('button,input,select')) n.disabled = busy;
   $('cancel').disabled = !worker;
+  $('method-close').disabled = false;
   $('undo').disabled = busy || !history.length;
   $('clear').disabled = busy || !protectedCount();
   $('png').disabled = busy || !result;
@@ -34,7 +35,7 @@ function settings() {
   const max = Math.floor(image[$('axis').value] / 2);
   $('count').max = max;
   if (Number($('count').value) > max) $('count').value = max;
-  $('dimensions').textContent = `WORKING IMAGE / ${image.width} × ${image.height}`;
+  $('dimensions').textContent = `${image.width} × ${image.height}`;
 }
 function invalidate() {
   revision++;
@@ -428,3 +429,6 @@ $('report').addEventListener('click', async () => {
 settings();
 draw();
 run();
+
+$('method-open').addEventListener('click', () => $('method-panel').showModal());
+$('method-close').addEventListener('click', () => $('method-panel').close());

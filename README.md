@@ -4,6 +4,10 @@ A content-aware image resizing workbench with protection painting, minimum-cost 
 
 ![Seam Atelier](docs/workbench.png)
 
+## Interface
+
+Source and result images share the main workspace, with resize and protection-mask tools in a side panel. Both canvases retain identical display dimensions and the original image extent, so the resized result remains comparable at the same pixel scale. Seam selection and protection results stay beneath the images; algorithm notes open separately. Keyboard mask painting, undo, energy inspection, and uniformly scaled comparison remain available.
+
 ## Run
 
 Requires Python 3.10+. No runtime dependencies, services, or API keys.
