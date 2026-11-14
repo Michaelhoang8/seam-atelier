@@ -67,9 +67,27 @@ function draw() {
     for (const id of result.steps[selected].original) pixels.set([255, 154, 110, 255], id * 4);
   ctx.putImageData(new ImageData(pixels, image.width, image.height), 0, 0);
   if (cursor) {
-    ctx.strokeStyle = '#ffffff';
+    const painting = $('brush').value !== 'inspect',
+      radius = painting ? Number($('radius').value) + 0.5 : 3;
+    ctx.beginPath();
+    ctx.arc(cursor.x + 0.5, cursor.y + 0.5, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = '#172e31';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.strokeStyle =
+      $('brush').value === 'protect'
+        ? '#a9ffff'
+        : $('brush').value === 'erase'
+          ? '#ffc9b0'
+          : '#fff';
     ctx.lineWidth = 1;
-    ctx.strokeRect(cursor.x - 2.5, cursor.y - 2.5, 5, 5);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cursor.x - 2, cursor.y + 0.5);
+    ctx.lineTo(cursor.x + 3, cursor.y + 0.5);
+    ctx.moveTo(cursor.x + 0.5, cursor.y - 2);
+    ctx.lineTo(cursor.x + 0.5, cursor.y + 3);
+    ctx.stroke();
   }
   $('mask-note').textContent =
     `${protectedCount().toLocaleString()} protected pixels · cyan mask · ${history.length}/20 undo steps`;
@@ -155,6 +173,11 @@ function run() {
     result = data.result;
     selected = 0;
     renderEvidence();
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches)
+      $('result-canvas').animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: 300,
+        easing: 'ease-out',
+      });
     status(
       `Removed ${result.count} ${result.axis === 'width' ? 'vertical' : 'horizontal'} seams. Inspect a path or export the resized image.`,
     );
@@ -224,10 +247,12 @@ $('source-canvas').addEventListener('pointerdown', (e) => {
   paintLine(cursor, cursor);
 });
 $('source-canvas').addEventListener('pointermove', (e) => {
-  if (!drawing || busy) return;
+  if (busy) return;
   cursor = point(e);
-  paintLine(lastPoint, cursor);
-  lastPoint = cursor;
+  if (drawing) {
+    paintLine(lastPoint, cursor);
+    lastPoint = cursor;
+  } else draw();
 });
 for (const event of ['pointerup', 'pointercancel', 'lostpointercapture'])
   $('source-canvas').addEventListener(event, () => {
@@ -432,3 +457,11 @@ run();
 
 $('method-open').addEventListener('click', () => $('method-panel').showModal());
 $('method-close').addEventListener('click', () => $('method-panel').close());
+
+$('source-canvas').addEventListener('pointerleave', () => {
+  if (!drawing) {
+    cursor = null;
+    draw();
+  }
+});
+for (const id of ['brush', 'radius']) $(id).addEventListener('input', draw);

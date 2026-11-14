@@ -8,6 +8,8 @@ A content-aware image resizing workbench with protection painting, minimum-cost 
 
 Source and result images share the main workspace, with resize and protection-mask tools in a side panel. Both canvases retain identical display dimensions and the original image extent, so the resized result remains comparable at the same pixel scale. Seam selection and protection results stay beneath the images; algorithm notes open separately. Keyboard mask painting, undo, energy inspection, and uniformly scaled comparison remain available.
 
+The brush cursor follows the pointer at the selected radius, with cyan protection and peach erasure outlines. Keyboard painting uses the same cursor. Completed resize previews fade in briefly; reduced-motion preferences disable that transition. Inspection overlays remain separate from exported image pixels.
+
 ## Run
 
 Requires Python 3.10+. No runtime dependencies, services, or API keys.
